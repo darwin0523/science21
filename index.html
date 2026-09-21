@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Food Chain Carnival!</title>
+<style>
+:root{
+  --red:#E8362B; --gold:#FFC93C; --tent:#FFF7E8; --deep:#3A2210; --teal:#0FA3A3; --purple:#7A3EFF; --pink:#FF3E7A; --green:#1FA37E;
+  padding-top: env(safe-area-inset-top,0px);
+  padding-bottom: env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+body{
+  margin:0; min-height:100%;
+  font-family:'Trebuchet MS','Segoe UI',Verdana,sans-serif;
+  background:
+    repeating-linear-gradient(45deg, #E8362B 0 40px, #FFF7E8 40px 80px);
+  color:var(--deep);
+  display:flex; flex-direction:column; align-items:center;
+  padding:16px 14px 40px;
+}
+h1,h2,h3{margin:0 0 8px;}
+.wrap{width:100%; max-width:760px;}
+.lights{
+  display:flex; justify-content:space-between; padding:0 4px; margin-bottom:6px;
+}
+.lights span{
+  width:14px; height:14px; border-radius:50%; display:inline-block;
+  box-shadow:0 0 8px 3px currentColor; animation:twinkle 1.4s infinite alternate;
+}
+.lights span:nth-child(odd){ color:#FFC93C; }
+.lights span:nth-child(even){ color:#FF3E7A; animation-delay:.5s;}
+@keyframes twinkle{ from{opacity:.5;} to{opacity:1;} }
+.marquee{
+  text-align:center; background:var(--red); color:#fff; border-radius:18px;
+  padding:14px 10px 10px; margin-bottom:10px; border:5px solid var(--gold);
+  box-shadow:0 8px 0 rgba(0,0,0,.2);
+}
+.marquee .title{ font-size:2rem; font-weight:900; letter-spacing:1px; text-shadow:0 3px 0 rgba(0,0,0,.25); }
+.marquee .sub{ font-size:.95rem; opacity:.95; }
+.ticket-pill{
+  display:inline-flex; align-items:center; gap:6px; background:var(--gold); color:#5a3400;
+  font-weight:bold; padding:8px 16px; border-radius:999px; box-shadow:0 4px 0 rgba(0,0,0,.15);
+  border:2px dashed #b5860a;
+}
+.card{
+  background:var(--tent); border-radius:22px; padding:22px;
+  box-shadow:0 12px 0 rgba(0,0,0,.12), 0 20px 30px rgba(0,0,0,.2);
+  margin-bottom:16px; border:4px solid #ffe0a3;
+}
+.grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media (max-width:560px){ .grid{grid-template-columns:1fr;} }
+.mode-btn{
+  cursor:pointer; border:none; border-radius:18px; padding:20px 16px;
+  color:#fff; font-weight:bold; font-size:1.1rem; text-align:left;
+  box-shadow:0 6px 0 rgba(0,0,0,.22); transition:transform .12s;
+  display:flex; flex-direction:column; gap:6px; border:3px solid rgba(255,255,255,.4);
+}
+.mode-btn:active{ transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,.2); }
+.mode-btn small{ font-weight:normal; opacity:.92; font-size:.82rem; }
+.c1{background:linear-gradient(135deg,#E8362B,#FF8A5C);}
+.c2{background:linear-gradient(135deg,#FF3E7A,#7A3EFF);}
+.c3{background:linear-gradient(135deg,#0FA3A3,#1FA37E);}
+.c4{background:linear-gradient(135deg,#FFC93C,#E8362B);}
+.c5{background:linear-gradient(135deg,#7A3EFF,#0FA3A3);}
+.btn{
+  cursor:pointer; border:none; border-radius:14px; padding:12px 20px;
+  font-weight:bold; font-size:1rem; color:#fff; background:var(--teal);
+  box-shadow:0 5px 0 rgba(0,0,0,.15);
+}
+.btn:active{ transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.15); }
+.btn.green{background:var(--green);}
+.btn.pink{background:var(--pink);}
+.btn.gray{background:#8a97a3;}
+.btn.gold{background:var(--gold); color:#5a3400;}
+.row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.between{ justify-content:space-between; }
+.pill{
+  background:#fff; color:var(--deep); padding:6px 14px; border-radius:999px;
+  font-weight:bold; font-size:.88rem; border:2px solid #ffe0a3;
+}
+.timerbar-outer{ background:#fff; border-radius:999px; height:16px; overflow:hidden; margin:10px 0 16px; border:2px solid #ffe0a3;}
+.timerbar-inner{ height:100%; background:linear-gradient(90deg,#1FA37E,#FFC93C,#E8362B); width:100%; transition:width 1s linear;}
+.qtext{ font-size:1.25rem; font-weight:bold; margin:6px 0 16px; line-height:1.35; text-align:center;}
+input[type=number]{ padding:8px; border-radius:8px; border:2px solid #e0c088; width:80px; font-size:1rem;}
+input[type=text]{ padding:9px 10px; border-radius:8px; border:2px solid #e0c088; font-size:.95rem;}
+label{ font-weight:bold; font-size:.95rem;}
+.center{ text-align:center; }
+.hidden{ display:none !important; }
+.small{ font-size:.85rem; color:#6a5638; }
+
+/* Ring Toss */
+.bottlerow{ display:flex; justify-content:center; gap:14px; flex-wrap:wrap; margin-bottom:6px; }
+.bottle{
+  cursor:pointer; position:relative; width:110px; min-height:130px; border:none;
+  background:linear-gradient(180deg,#3EA6FF,#1F6FBF); border-radius:14px 14px 40% 40%/14px 14px 60% 60%;
+  color:#fff; font-weight:bold; font-size:.92rem; padding:14px 8px 20px; box-shadow:0 5px 0 rgba(0,0,0,.2);
+  display:flex; align-items:flex-end; justify-content:center; text-align:center;
+}
+.bottle::before{ content:'🎪'; position:absolute; top:-22px; left:50%; transform:translateX(-50%); font-size:1.3rem; }
+.bottle.correct{ background:linear-gradient(180deg,#3EC46D,#1FA37E); }
+.bottle.wrong{ background:linear-gradient(180deg,#FF5C8A,#B23A55); opacity:.6; transform:rotate(8deg);}
+.ring{
+  position:fixed; font-size:2rem; z-index:99; pointer-events:none; animation:ringtoss .5s ease-out forwards;
+}
+@keyframes ringtoss{ 0%{ transform:translateY(-60px) scale(1.3); opacity:1;} 100%{ transform:translateY(0) scale(1); opacity:0;} }
+
+/* Balloon Pop */
+.balloonzone{
+  position:relative; height:320px; background:linear-gradient(180deg,#bdeeff,#eafff0);
+  border-radius:16px; overflow:hidden; margin-bottom:10px; border:3px solid #ffe0a3;
+}
+.balloon{
+  position:absolute; bottom:-60px; font-size:2.6rem; cursor:pointer; text-align:center;
+  animation:riseup linear forwards; filter:drop-shadow(0 4px 3px rgba(0,0,0,.2));
+}
+.balloon .lbl{ font-size:.62rem; font-weight:bold; background:#fff; border-radius:6px; padding:1px 4px; color:var(--deep); display:block; margin-top:-4px;}
+@keyframes riseup{ from{ bottom:-60px; } to{ bottom:340px; } }
+.target-banner{
+  text-align:center; font-size:1.15rem; font-weight:bold; color:#fff; padding:12px;
+  border-radius:14px; margin-bottom:12px; background:linear-gradient(135deg,#FF3E7A,#7A3EFF);
+  box-shadow:0 5px 0 rgba(0,0,0,.15);
+}
+
+/* High Striker */
+.striker-tower{
+  position:relative; width:70px; margin:0 auto 16px; height:280px;
+  background:linear-gradient(180deg,#eee,#fff); border-radius:10px; border:4px solid #b5860a;
+  display:flex; flex-direction:column-reverse; overflow:hidden;
+}
+.striker-fill{ background:linear-gradient(180deg,#E8362B,#FFC93C); width:100%; height:0%; transition:height .6s cubic-bezier(.34,1.56,.64,1); }
+.striker-bell{ text-align:center; font-size:2rem; margin-bottom:6px; }
+.chainzone{
+  display:flex; flex-wrap:wrap; gap:10px; min-height:70px; padding:10px;
+  border:3px dashed #e0c088; border-radius:14px; background:#fffdf5; margin-bottom:14px; justify-content:center;
+}
+.chip{
+  padding:10px 14px; border-radius:12px; background:linear-gradient(135deg,#FFC93C,#E8362B);
+  color:#fff; font-weight:bold; cursor:grab; box-shadow:0 4px 0 rgba(0,0,0,.15);
+  user-select:none; font-size:.95rem;
+}
+.slotrow{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; justify-content:center;}
+.slot{
+  flex:1; min-width:90px; min-height:60px; border:3px solid #e0c088; border-radius:12px;
+  background:#fff; display:flex; align-items:center; justify-content:center; text-align:center;
+  padding:6px; font-size:.82rem; color:#a99667; font-weight:bold;
+}
+.slot.filled{ border-color:var(--green); color:var(--deep); background:#eafff0;}
+.arrow{ font-size:1.3rem; align-self:center; color:#c9b483;}
+
+/* Duck Pond */
+.pond{
+  background:linear-gradient(180deg,#bdeeff,#7fd3e8); border-radius:20px; padding:16px;
+  border:4px solid #4fb6cc; margin-bottom:14px;
+}
+.duckgrid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+@media (max-width:480px){ .duckgrid{grid-template-columns:repeat(3,1fr);} }
+.duck{
+  aspect-ratio:1/1; border-radius:50%; background:radial-gradient(circle at 35% 30%,#fff,#ffe58a);
+  display:flex; align-items:center; justify-content:center; text-align:center; padding:4px;
+  font-weight:bold; font-size:.78rem; color:var(--deep); cursor:pointer; box-shadow:0 4px 0 rgba(0,0,0,.15);
+  animation:bob 2.4s ease-in-out infinite;
+}
+.duck:nth-child(even){ animation-delay:.6s; }
+.duck:nth-child(3n){ animation-delay:1.2s; }
+@keyframes bob{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-5px);} }
+.duck.flipped{ background:linear-gradient(135deg,#fff,#eafff0); animation:none; }
+.duck.matched{ background:linear-gradient(135deg,#3EC46D,#1FA37E); color:#fff; opacity:.85; cursor:default; animation:none;}
+
+/* Editor */
+.editrow{
+  display:grid; grid-template-columns:1fr; gap:6px; border:2px dashed #e0c088;
+  border-radius:14px; padding:12px; margin-bottom:12px; background:#fffdf5;
+}
+.editrow input[type=text]{ width:100%; }
+.optrow{ display:flex; align-items:center; gap:8px; }
+.optrow input[type=radio]{ transform:scale(1.3); }
+
+.opt{
+  display:block; width:100%; text-align:left; margin:8px 0; padding:14px 16px;
+  border-radius:14px; border:3px solid #e0c088; background:#fffdf5;
+  font-size:1.02rem; cursor:pointer; font-weight:600; color:var(--deep);
+}
+.opt.correct{ background:#d4f7dc; border-color:#3EC46D; }
+.opt.wrong{ background:#ffd9df; border-color:#FF5C8A; }
+.scoreboard{ display:flex; gap:14px; justify-content:center; margin-bottom:14px; flex-wrap:wrap;}
+.teamcard{ flex:1; min-width:140px; border-radius:16px; padding:14px; text-align:center; color:#fff; box-shadow:0 5px 0 rgba(0,0,0,.2);}
+.teamcard.t1{ background:linear-gradient(135deg,#E8362B,#FF8A5C);}
+.teamcard.t2{ background:linear-gradient(135deg,#0FA3A3,#7A3EFF);}
+.teamcard.active{ outline:4px solid var(--gold); transform:scale(1.04); }
+.teamcard .pts{ font-size:1.7rem; font-weight:bold; }
+.popfx{ position:fixed; font-weight:bold; font-size:1.6rem; pointer-events:none; z-index:99; animation:popup .9s ease-out forwards;}
+@keyframes popup{ 0%{opacity:1; transform:translateY(0) scale(1);} 100%{opacity:0; transform:translateY(-60px) scale(1.4);} }
+.banner{ text-align:center; font-size:1.5rem; font-weight:bold; margin:10px 0;}
+.prize{ font-size:3rem; text-align:center; margin:6px 0;}
+.confetti{ position:fixed; top:-10px; font-size:1.6rem; animation:fall linear forwards; z-index:99;}
+@keyframes fall{ to{ transform:translateY(110vh) rotate(360deg); opacity:.2; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="lights"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+  <div class="marquee">
+    <div class="title">🎪 FOOD CHAIN CARNIVAL 🎪</div>
+    <div class="sub">Step right up! Win tickets learning about producers, consumers &amp; energy flow!</div>
+  </div>
+
+  <!-- HOME -->
+  <div id="screen-home" class="card">
+    <h2 class="center">🎟️ Choose Your Game Booth</h2>
+    <div class="grid">
+      <button class="mode-btn c1" onclick="startRingSetup()">🎯 Ring Toss Trivia<small>Toss rings at the right answer bottle!</small></button>
+      <button class="mode-btn c2" onclick="startBalloonSetup()">🎈 Balloon Pop Sort<small>Pop only the balloons that match!</small></button>
+      <button class="mode-btn c3" onclick="startStrikerSetup()">🔨 High Striker Challenge<small>Order the food chain to ring the bell!</small></button>
+      <button class="mode-btn c5" onclick="startDuckSetup()">🦆 Duck Pond Pairs<small>Flip ducks to match organism &amp; role</small></button>
+      <button class="mode-btn c4" onclick="openEditor()">✏️ Edit Trivia Questions<small>Customize the question bank &amp; timer</small></button>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="screen-settings" class="card hidden">
+    <h2 id="settings-title">Game Setup</h2>
+    <div class="row" style="margin-bottom:14px;">
+      <label>⏱ Timer (seconds per round):</label>
+      <input type="number" id="timerInput" min="60" max="120" value="90">
+    </div>
+    <div id="playerTypeBlock" class="hidden" style="margin-bottom:14px;">
+      <label>Play as:</label>
+      <div class="row" style="margin-top:6px;">
+        <label class="row" style="gap:4px;"><input type="radio" name="playerType" value="solo" checked onchange="togglePlayerType()"> Solo</label>
+        <label class="row" style="gap:4px;"><input type="radio" name="playerType" value="team" onchange="togglePlayerType()"> Two Teams (turns)</label>
+      </div>
+    </div>
+    <div id="teamNamesBlock" class="hidden">
+      <div class="row" style="margin-bottom:10px;"><label>Team 1 name:</label><input type="text" id="team1name" value="Team Eagle"></div>
+      <div class="row" style="margin-bottom:10px;"><label>Team 2 name:</label><input type="text" id="team2name" value="Team Tarsier"></div>
+    </div>
+    <div class="row" style="margin-top:14px;">
+      <button class="btn gold" id="settingsGoBtn" onclick="launchFromSettings()">Start! 🎪</button>
+      <button class="btn gray" onclick="goHome()">Back</button>
+    </div>
+  </div>
+
+  <!-- RING TOSS -->
+  <div id="screen-ring" class="card hidden">
+    <div class="scoreboard" id="ringScoreboard"></div>
+    <div class="row between">
+      <div class="pill" id="ringQNumPill">Q 1/10</div>
+      <div class="ticket-pill">🎟️ <span id="ringTicketsHeader">0</span></div>
+    </div>
+    <div class="timerbar-outer"><div class="timerbar-inner" id="ringTimerBar"></div></div>
+    <div class="qtext" id="ringQText">Question</div>
+    <div class="bottlerow" id="ringBottles"></div>
+  </div>
+
+  <!-- BALLOON POP -->
+  <div id="screen-balloon" class="card hidden">
+    <div class="scoreboard" id="balloonScoreboard"></div>
+    <div class="row between">
+      <div class="pill" id="balloonTurnPill">Pop the matching balloons!</div>
+      <div class="pill">⏱ <span id="balloonTimeLeft">90</span>s</div>
+    </div>
+    <div class="timerbar-outer"><div class="timerbar-inner" id="balloonTimerBar"></div></div>
+    <div class="target-banner" id="balloonTargetBanner">🎯 Pop only the HERBIVORES!</div>
+    <div class="balloonzone" id="balloonZone"></div>
+  </div>
+
+  <!-- HIGH STRIKER -->
+  <div id="screen-striker" class="card hidden">
+    <div class="row between">
+      <div class="pill">Round <span id="strikerRNum">1</span>/<span id="strikerRTotal">3</span></div>
+      <div class="ticket-pill">🎟️ <span id="strikerTickets">0</span></div>
+    </div>
+    <div class="timerbar-outer"><div class="timerbar-inner" id="strikerTimerBar"></div></div>
+    <div class="striker-bell">🔔</div>
+    <div class="striker-tower"><div class="striker-fill" id="strikerFill"></div></div>
+    <h3 class="center" style="margin-top:0;">Drag each organism to build the food chain (base = Producer, top = predator)</h3>
+    <div class="slotrow" id="strikerSlots"></div>
+    <div class="chainzone" id="strikerPool"></div>
+    <div class="row center" style="justify-content:center;">
+      <button class="btn green" onclick="checkStrikerRound()">🔨 Swing the Hammer!</button>
+    </div>
+  </div>
+
+  <!-- DUCK POND -->
+  <div id="screen-duck" class="card hidden">
+    <div class="scoreboard" id="duckScoreboard"></div>
+    <div class="row between">
+      <div class="pill" id="duckTurnPill">Find the matching pairs!</div>
+      <div class="pill">⏱ <span id="duckTimeLeft">90</span>s</div>
+    </div>
+    <div class="timerbar-outer"><div class="timerbar-inner" id="duckTimerBar"></div></div>
+    <div class="pond"><div class="duckgrid" id="duckGrid"></div></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="screen-results" class="card hidden center">
+    <div class="banner" id="resultsBanner">🎉 Great Job! 🎉</div>
+    <div class="prize" id="resultsPrize"></div>
+    <div id="resultsBody" style="font-size:1.1rem; margin-bottom:16px;"></div>
+    <button class="btn green" onclick="goHome()">🏠 Back to the Midway</button>
+  </div>
+
+  <!-- EDITOR -->
+  <div id="screen-editor" class="card hidden">
+    <h2>✏️ Edit Trivia Questions</h2>
+    <p class="small">Used by Ring Toss Trivia. Change text, options, and mark the correct answer.</p>
+    <div id="editorList"></div>
+    <div class="row">
+      <button class="btn green" onclick="addQuestion()">➕ Add Question</button>
+      <button class="btn pink" onclick="saveEditor()">💾 Save &amp; Back</button>
+      <button class="btn gray" onclick="resetQuestions()">↩️ Reset to Default</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const DEFAULT_QUESTIONS = [
+  {q:"What is the main source of energy for almost every food chain?", opts:["The Moon","The Sun","Soil","Water"], correct:1},
+  {q:"Which organism makes its own food through photosynthesis?", opts:["Consumer","Decomposer","Producer","Predator"], correct:2},
+  {q:"An animal that eats ONLY plants is called a...", opts:["Carnivore","Herbivore","Omnivore","Decomposer"], correct:1},
+  {q:"An animal that eats ONLY other animals is called a...", opts:["Herbivore","Omnivore","Carnivore","Producer"], correct:2},
+  {q:"An animal that eats BOTH plants and animals is called a...", opts:["Omnivore","Herbivore","Producer","Decomposer"], correct:0},
+  {q:"What do decomposers do in a food web?", opts:["Make their own food","Break down dead organisms and return nutrients to soil","Hunt other animals","Produce oxygen only"], correct:1},
+  {q:"What happens to energy as it moves up a food chain?", opts:["It increases","It stays the same","It decreases","It disappears completely"], correct:2},
+  {q:"What is the difference between a food chain and a food web?", opts:["No difference","A food web shows multiple interconnected food chains","A food chain has more organisms","A food web has no producers"], correct:1},
+  {q:"In the chain Grass ➜ Rabbit ➜ Fox ➜ Owl, what is the Rabbit?", opts:["Producer","Primary Consumer","Secondary Consumer","Decomposer"], correct:1},
+  {q:"The Philippine Eagle is best described as a/an...", opts:["Producer","Apex predator (carnivore)","Decomposer","Herbivore"], correct:1},
+  {q:"Why is having balance among producers, consumers, and decomposers important?", opts:["It keeps the ecosystem stable","It has no real effect","It only matters to plants","Balance is not needed"], correct:0},
+  {q:"Which of these is an example of a decomposer?", opts:["Tiger","Grass","Fungi (mushroom)","Eagle"], correct:2}
+];
+let QUESTIONS = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS));
+
+const CATEGORIES = ["🌱 Producer","🐰 Herbivore","🦁 Carnivore","🐻 Omnivore","🍄 Decomposer"];
+const CLASSIFY_ITEMS = [
+  {name:"Grass", emoji:"🌾", cat:0},{name:"Rice Plant", emoji:"🌾", cat:0},{name:"Mango Tree", emoji:"🌳", cat:0},{name:"Algae", emoji:"🟢", cat:0},
+  {name:"Rabbit", emoji:"🐰", cat:1},{name:"Tamaraw", emoji:"🐃", cat:1},{name:"Deer", emoji:"🦌", cat:1},{name:"Cow", emoji:"🐄", cat:1},
+  {name:"Eagle", emoji:"🦅", cat:2},{name:"Tiger", emoji:"🐯", cat:2},{name:"Snake", emoji:"🐍", cat:2},{name:"Shark", emoji:"🦈", cat:2},
+  {name:"Bear", emoji:"🐻", cat:3},{name:"Human", emoji:"🧑", cat:3},{name:"Bearcat", emoji:"🐾", cat:3},{name:"Chicken", emoji:"🐔", cat:3},
+  {name:"Mushroom", emoji:"🍄", cat:4},{name:"Bacteria", emoji:"🦠", cat:4},{name:"Earthworm", emoji:"🪱", cat:4}
+];
+const BUILDER_ROUNDS = [
+  ["Grass","Rabbit","Fox","Owl"],
+  ["Wild Plants","Tamaraw","Philippine Tarsier","Philippine Eagle"],
+  ["Pond Weeds","Shrimp","Fish","Dragonfly"]
+];
+const MEMORY_PAIRS = [
+  {a:"Grass", b:"Producer"},{a:"Rabbit", b:"Herbivore"},{a:"Tiger", b:"Carnivore"},
+  {a:"Bear", b:"Omnivore"},{a:"Mushroom", b:"Decomposer"},{a:"Sun", b:"Energy Source"}
+];
+
+/* ---------------- STATE ---------------- */
+let TIMER_SECONDS = 90;
+let pendingMode = null;
+let timerHandle = null;
+
+function show(id){
+  document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function goHome(){ clearInterval(timerHandle); clearInterval(balloonSpawnHandle); clearInterval(balloonTargetHandle); show('screen-home'); }
+function shuffle(arr){ let a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function confettiBurst(){
+  const emojis=['🎉','🎟️','⭐','🎈','🍿'];
+  for(let i=0;i<16;i++){
+    const s=document.createElement('div');
+    s.className='confetti'; s.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    s.style.left=Math.random()*100+'vw';
+    s.style.animationDuration=(1.6+Math.random()*1.2)+'s';
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),3000);
+  }
+}
+function popfx(text, anchorEl, color){
+  const rect=anchorEl.getBoundingClientRect();
+  const s=document.createElement('div');
+  s.className='popfx'; s.textContent=text; s.style.color=color;
+  s.style.left=Math.max(10,rect.left+rect.width/2-30)+'px';
+  s.style.top=(rect.top+16)+'px';
+  document.body.appendChild(s);
+  setTimeout(()=>s.remove(),900);
+}
+function updateBar(id,left,total){
+  const pct=Math.max(0,(left/total)*100);
+  document.getElementById(id).style.width=pct+'%';
+}
+function prizeFor(tickets){
+  if(tickets>=150) return {emoji:'🧸🦅', text:'GRAND PRIZE — Giant Stuffed Philippine Eagle!'};
+  if(tickets>=90) return {emoji:'🧸', text:'Big Prize — Teddy Bear!'};
+  if(tickets>=50) return {emoji:'🐟', text:'Nice Prize — Goldfish in a bag!'};
+  if(tickets>=20) return {emoji:'🍭', text:'Small Prize — Lollipop!'};
+  return {emoji:'🎫', text:'Thanks for playing — try again for a bigger prize!'};
+}
+
+/* ---------------- SETTINGS ROUTER ---------------- */
+function hideOptionalBlocks(){
+  document.getElementById('teamNamesBlock').classList.add('hidden');
+  document.getElementById('playerTypeBlock').classList.add('hidden');
+}
+function resetPlayerTypeRadio(){ document.querySelectorAll('input[name=playerType]').forEach(r=>r.checked=(r.value==='solo')); }
+function togglePlayerType(){
+  const val = document.querySelector('input[name=playerType]:checked').value;
+  document.getElementById('teamNamesBlock').classList.toggle('hidden', val!=='team');
+}
+function currentPlayerType(){ const r=document.querySelector('input[name=playerType]:checked'); return r?r.value:'solo'; }
+
+function startRingSetup(){ pendingMode='ring'; document.getElementById('settings-title').textContent='🎯 Ring Toss Trivia Setup'; hideOptionalBlocks(); document.getElementById('playerTypeBlock').classList.remove('hidden'); resetPlayerTypeRadio(); show('screen-settings'); }
+function startBalloonSetup(){ pendingMode='balloon'; document.getElementById('settings-title').textContent='🎈 Balloon Pop Sort Setup'; hideOptionalBlocks(); document.getElementById('playerTypeBlock').classList.remove('hidden'); resetPlayerTypeRadio(); show('screen-settings'); }
+function startStrikerSetup(){ pendingMode='striker'; document.getElementById('settings-title').textContent='🔨 High Striker Setup'; hideOptionalBlocks(); show('screen-settings'); }
+function startDuckSetup(){ pendingMode='duck'; document.getElementById('settings-title').textContent='🦆 Duck Pond Pairs Setup'; hideOptionalBlocks(); document.getElementById('playerTypeBlock').classList.remove('hidden'); resetPlayerTypeRadio(); show('screen-settings'); }
+
+function launchFromSettings(){
+  let t=parseInt(document.getElementById('timerInput').value,10);
+  if(isNaN(t)) t=90;
+  t=Math.max(60,Math.min(120,t));
+  TIMER_SECONDS=t;
+  if(pendingMode==='ring') beginRing(currentPlayerType());
+  else if(pendingMode==='balloon') beginBalloon(currentPlayerType());
+  else if(pendingMode==='striker') beginStriker();
+  else if(pendingMode==='duck') beginDuck(currentPlayerType());
+}
+
+/* ---------------- RING TOSS TRIVIA ---------------- */
+let ringMode, ringQ, ringIdx, ringScore, ringT1, ringT2, ringCurrentTeam, ringTeamName1, ringTeamName2, ringTimeLeft;
+function beginRing(mode){
+  ringMode=mode;
+  ringQ=shuffle(QUESTIONS);
+  ringIdx=0; ringScore=0; ringT1=0; ringT2=0; ringCurrentTeam=1;
+  ringTeamName1=document.getElementById('team1name').value||'Team 1';
+  ringTeamName2=document.getElementById('team2name').value||'Team 2';
+  ringRenderScoreboard();
+  show('screen-ring');
+  loadRingQ();
+}
+function ringRenderScoreboard(){
+  const box=document.getElementById('ringScoreboard');
+  if(ringMode==='team'){
+    box.innerHTML=`<div class="teamcard t1" id="ringTeamCard1"><div>${ringTeamName1}</div><div class="pts" id="ringPts1">0</div></div>
+      <div class="teamcard t2" id="ringTeamCard2"><div>${ringTeamName2}</div><div class="pts" id="ringPts2">0</div></div>`;
+  } else {
+    box.innerHTML=`<div class="teamcard t1"><div>🎟️ Tickets</div><div class="pts" id="ringPtsSolo">0</div></div>`;
+  }
+}
+function ringUpdateScoreboard(){
+  if(ringMode==='team'){
+    document.getElementById('ringPts1').textContent=ringT1;
+    document.getElementById('ringPts2').textContent=ringT2;
+    document.getElementById('ringTeamCard1').classList.toggle('active', ringCurrentTeam===1);
+    document.getElementById('ringTeamCard2').classList.toggle('active', ringCurrentTeam===2);
+    document.getElementById('ringTicketsHeader').textContent = (ringCurrentTeam===1?ringT1:ringT2);
+  } else {
+    document.getElementById('ringPtsSolo').textContent=ringScore;
+    document.getElementById('ringTicketsHeader').textContent=ringScore;
+  }
+}
+function loadRingQ(){
+  if(ringIdx>=ringQ.length){ endRing(); return; }
+  clearInterval(timerHandle);
+  const item=ringQ[ringIdx];
+  document.getElementById('ringQNumPill').textContent = `Q ${ringIdx+1}/${ringQ.length}` + (ringMode==='team' ? ' — '+(ringCurrentTeam===1?ringTeamName1:ringTeamName2)+"'s turn" : '');
+  document.getElementById('ringQText').textContent = item.q;
+  ringUpdateScoreboard();
+  const box=document.getElementById('ringBottles'); box.innerHTML='';
+  const order=shuffle(item.opts.map((o,i)=>({o,i})));
+  order.forEach(entry=>{
+    const b=document.createElement('button');
+    b.className='bottle'; b.textContent=entry.o;
+    b.onclick=(e)=>answerRing(entry.i===item.correct,b,item,e);
+    box.appendChild(b);
+  });
+  ringTimeLeft=TIMER_SECONDS;
+  updateBar('ringTimerBar', ringTimeLeft, TIMER_SECONDS);
+  timerHandle=setInterval(()=>{
+    ringTimeLeft--;
+    updateBar('ringTimerBar', ringTimeLeft, TIMER_SECONDS);
+    if(ringTimeLeft<=0){ clearInterval(timerHandle); answerRing(false,null,item,null); }
+  },1000);
+}
+function answerRing(isCorrect,btnEl,item,evt){
+  clearInterval(timerHandle);
+  const bottles=document.querySelectorAll('#ringBottles .bottle');
+  bottles.forEach(b=>{ b.onclick=null; if(b.textContent===item.opts[item.correct]) b.classList.add('correct'); });
+  if(btnEl){
+    if(!isCorrect) btnEl.classList.add('wrong');
+    const r=document.createElement('div'); r.className='ring'; r.textContent='⭕';
+    const rect=btnEl.getBoundingClientRect();
+    r.style.left=(rect.left+rect.width/2-16)+'px'; r.style.top=(rect.top-40)+'px';
+    document.body.appendChild(r); setTimeout(()=>r.remove(),500);
+  }
+  if(isCorrect){
+    if(ringMode==='team'){ if(ringCurrentTeam===1) ringT1+=10; else ringT2+=10; } else ringScore+=10;
+    confettiBurst();
+  }
+  ringUpdateScoreboard();
+  if(ringMode==='team') ringCurrentTeam=ringCurrentTeam===1?2:1;
+  setTimeout(()=>{ ringIdx++; loadRingQ(); },1300);
+}
+function endRing(){
+  show('screen-results'); confettiBurst();
+  if(ringMode==='team'){
+    let winner = ringT1>ringT2 ? `🏆 ${ringTeamName1} wins!` : ringT2>ringT1 ? `🏆 ${ringTeamName2} wins!` : "🤝 It's a tie!";
+    document.getElementById('resultsBanner').textContent = winner;
+    document.getElementById('resultsBody').innerHTML = `${ringTeamName1}: <b>${ringT1}</b> 🎟️ &nbsp;|&nbsp; ${ringTeamName2}: <b>${ringT2}</b> 🎟️`;
+    const best = Math.max(ringT1,ringT2); const p=prizeFor(best);
+    document.getElementById('resultsPrize').textContent = p.emoji;
+    document.getElementById('resultsBody').innerHTML += `<br><b>${p.text}</b>`;
+  } else {
+    document.getElementById('resultsBanner').textContent = '🎯 Ring Toss Complete!';
+    const p=prizeFor(ringScore);
+    document.getElementById('resultsPrize').textContent = p.emoji;
+    document.getElementById('resultsBody').innerHTML = `Tickets won: <b>${ringScore}</b> 🎟️<br><b>${p.text}</b>`;
+  }
+}
+
+/* ---------------- BALLOON POP SORT ---------------- */
+let balloonMode, balloonScore, balloonT1, balloonT2, balloonCurrentTeam, balloonCombo, balloonTimeLeft, balloonTeamName1, balloonTeamName2, balloonTargetCat;
+let balloonSpawnHandle=null, balloonTargetHandle=null;
+function beginBalloon(mode){
+  balloonMode=mode; balloonScore=0; balloonT1=0; balloonT2=0; balloonCurrentTeam=1; balloonCombo=1;
+  balloonTeamName1=document.getElementById('team1name').value||'Team 1';
+  balloonTeamName2=document.getElementById('team2name').value||'Team 2';
+  document.getElementById('balloonTurnPill').textContent = mode==='team' ? (balloonTeamName1+"'s turn") : 'Pop the matching balloons!';
+  balloonRenderScoreboard(); balloonUpdateScoreboard();
+  document.getElementById('balloonZone').innerHTML='';
+  balloonPickTarget();
+  show('screen-balloon');
+  balloonTimeLeft=TIMER_SECONDS;
+  document.getElementById('balloonTimeLeft').textContent=balloonTimeLeft;
+  updateBar('balloonTimerBar', balloonTimeLeft, TIMER_SECONDS);
+  clearInterval(timerHandle); clearInterval(balloonSpawnHandle); clearInterval(balloonTargetHandle);
+  timerHandle=setInterval(()=>{
+    balloonTimeLeft--;
+    document.getElementById('balloonTimeLeft').textContent=Math.max(0,balloonTimeLeft);
+    updateBar('balloonTimerBar', balloonTimeLeft, TIMER_SECONDS);
+    if(mode==='team') document.getElementById('balloonTurnPill').textContent=(balloonCurrentTeam===1?balloonTeamName1:balloonTeamName2)+"'s turn";
+    if(balloonTimeLeft<=0){ endBalloon(); }
+  },1000);
+  balloonSpawnHandle=setInterval(balloonSpawn, 1000);
+  balloonTargetHandle=setInterval(balloonPickTarget, 9000);
+}
+function balloonRenderScoreboard(){
+  const box=document.getElementById('balloonScoreboard');
+  if(balloonMode==='team'){
+    box.innerHTML=`<div class="teamcard t1" id="balloonTeamCard1"><div>${balloonTeamName1}</div><div class="pts" id="balloonPts1">0</div></div>
+      <div class="teamcard t2" id="balloonTeamCard2"><div>${balloonTeamName2}</div><div class="pts" id="balloonPts2">0</div></div>`;
+  } else {
+    box.innerHTML=`<div class="teamcard t1"><div>🎟️ Tickets</div><div class="pts" id="balloonPtsSolo">0</div></div>`;
+  }
+}
+function balloonUpdateScoreboard(){
+  if(balloonMode==='team'){
+    document.getElementById('balloonPts1').textContent=balloonT1;
+    document.getElementById('balloonPts2').textContent=balloonT2;
+    document.getElementById('balloonTeamCard1').classList.toggle('active', balloonCurrentTeam===1);
+    document.getElementById('balloonTeamCard2').classList.toggle('active', balloonCurrentTeam===2);
+  } else {
+    document.getElementById('balloonPtsSolo').textContent=balloonScore;
+  }
+}
+function balloonPickTarget(){
+  let idx; do{ idx=Math.floor(Math.random()*CATEGORIES.length); } while(idx===balloonTargetCat);
+  balloonTargetCat=idx;
+  document.getElementById('balloonTargetBanner').textContent = `🎯 Pop only the ${CATEGORIES[idx].split(' ')[1].toUpperCase()}S!`;
+}
+const BALLOON_COLORS=['🎈','🎈','🎈','🎈'];
+function balloonSpawn(){
+  const zone=document.getElementById('balloonZone');
+  if(zone.children.length>=6) return;
+  const item = CLASSIFY_ITEMS[Math.floor(Math.random()*CLASSIFY_ITEMS.length)];
+  const el=document.createElement('div');
+  el.className='balloon';
+  el.style.left = (5+Math.random()*80)+'%';
+  const dur = 4.2 + Math.random()*1.4;
+  el.style.animationDuration = dur+'s';
+  el.innerHTML = `${item.emoji}<span class="lbl">${item.name}</span>`;
+  el.onclick = ()=>balloonAnswer(item.cat===balloonTargetCat,el,item);
+  zone.appendChild(el);
+  setTimeout(()=>{ if(el.parentNode) el.remove(); }, dur*1000);
+}
+function balloonAnswer(isCorrect,el,item){
+  if(isCorrect){
+    const pts=10*balloonCombo;
+    if(balloonMode==='team'){ if(balloonCurrentTeam===1) balloonT1+=pts; else balloonT2+=pts; } else balloonScore+=pts;
+    balloonCombo=Math.min(balloonCombo+1,5);
+    popfx('+'+pts, el, '#1FA37E');
+    confettiBurst();
+  } else {
+    balloonCombo=1;
+    if(balloonMode==='team'){ if(balloonCurrentTeam===1) balloonT1=Math.max(0,balloonT1-5); else balloonT2=Math.max(0,balloonT2-5); } else balloonScore=Math.max(0,balloonScore-5);
+    popfx('-5', el, '#FF5C8A');
+  }
+  balloonUpdateScoreboard();
+  if(balloonMode==='team') balloonCurrentTeam=balloonCurrentTeam===1?2:1;
+  el.remove();
+}
+function endBalloon(){
+  clearInterval(timerHandle); clearInterval(balloonSpawnHandle); clearInterval(balloonTargetHandle);
+  show('screen-results'); confettiBurst();
+  if(balloonMode==='team'){
+    let winner = balloonT1>balloonT2 ? `🏆 ${balloonTeamName1} wins!` : balloonT2>balloonT1 ? `🏆 ${balloonTeamName2} wins!` : "🤝 It's a tie!";
+    document.getElementById('resultsBanner').textContent = winner;
+    const best=Math.max(balloonT1,balloonT2); const p=prizeFor(best);
+    document.getElementById('resultsPrize').textContent = p.emoji;
+    document.getElementById('resultsBody').innerHTML = `${balloonTeamName1}: <b>${balloonT1}</b> 🎟️ &nbsp;|&nbsp; ${balloonTeamName2}: <b>${balloonT2}</b> 🎟️<br><b>${p.text}</b>`;
+  } else {
+    document.getElementById('resultsBanner').textContent = '🎈 Balloon Pop Complete!';
+    const p=prizeFor(balloonScore);
+    document.getElementById('resultsPrize').textContent = p.emoji;
+    document.getElementById('resultsBody').innerHTML = `Tickets won: <b>${balloonScore}</b> 🎟️<br><b>${p.text}</b>`;
+  }
+}
+
+/* ---------------- HIGH STRIKER ---------------- */
+let strikerRounds, strikerRIdx, strikerTickets, dragged;
+function beginStriker(){
+  strikerRounds=shuffle(BUILDER_ROUNDS); strikerRIdx=0; strikerTickets=0;
+  document.getElementById('strikerRTotal').textContent=strikerRounds.length;
+  document.getElementById('strikerFill').style.height='0%';
+  show('screen-striker');
+  loadStrikerRound();
+}
+function loadStrikerRound(){
+  if(strikerRIdx>=strikerRounds.length){ endStriker(); return; }
+  clearInterval(timerHandle);
+  document.getElementById('strikerRNum').textContent=strikerRIdx+1;
+  document.getElementById('strikerTickets').textContent=strikerTickets;
+  const chain=strikerRounds[strikerRIdx];
+  const labels=["Producer","Primary Consumer","Secondary Consumer","Tertiary Consumer"];
+  const slotRow=document.getElementById('strikerSlots'); slotRow.innerHTML='';
+  chain.forEach((c,i)=>{
+    if(i>0){ const ar=document.createElement('div'); ar.className='arrow'; ar.textContent='➜'; slotRow.appendChild(ar); }
+    const slot=document.createElement('div'); slot.className='slot'; slot.dataset.index=i;
+    slot.textContent=labels[i]||'Consumer';
+    slot.ondragover=e=>e.preventDefault();
+    slot.ondrop=e=>{
+      e.preventDefault(); if(!dragged) return;
+      slot.textContent=dragged.textContent; slot.dataset.filledWith=dragged.dataset.name;
+      slot.classList.add('filled'); dragged.remove(); dragged=null;
+    };
+    slotRow.appendChild(slot);
+  });
+  const pool=document.getElementById('strikerPool'); pool.innerHTML='';
+  shuffle(chain).forEach(name=>{
+    const chip=document.createElement('div'); chip.className='chip'; chip.textContent=name; chip.draggable=true;
+    chip.dataset.name=name; chip.ondragstart=()=>{ dragged=chip; };
+    pool.appendChild(chip);
+  });
+  const strikerTimeLeft0=TIMER_SECONDS;
+  updateBar('strikerTimerBar', strikerTimeLeft0, TIMER_SECONDS);
+  let t=strikerTimeLeft0;
+  timerHandle=setInterval(()=>{
+    t--; updateBar('strikerTimerBar', t, TIMER_SECONDS);
+    if(t<=0){ clearInterval(timerHandle); checkStrikerRound(); }
+  },1000);
+}
+function checkStrikerRound(){
+  clearInterval(timerHandle);
+  const chain=strikerRounds[strikerRIdx];
+  const slots=document.querySelectorAll('#strikerSlots .slot');
+  let correctCount=0;
+  slots.forEach((s,i)=>{
+    const val=s.dataset.filledWith;
+    if(val===chain[i]){ correctCount++; s.style.background='#d4f7dc'; s.style.borderColor='#3EC46D'; }
+    else { s.style.background='#ffd9df'; s.style.borderColor='#FF5C8A'; }
+  });
+  strikerTickets += correctCount*10;
+  document.getElementById('strikerTickets').textContent=strikerTickets;
+  const pct = Math.min(100, (strikerTickets/(strikerRounds.length*40))*100);
+  document.getElementById('strikerFill').style.height = pct+'%';
+  if(correctCount===chain.length) confettiBurst();
+  setTimeout(()=>{ strikerRIdx++; loadStrikerRound(); }, 1500);
+}
+function endStriker(){
+  show('screen-results'); confettiBurst();
+  document.getElementById('resultsBanner').textContent = strikerTickets>=strikerRounds.length*40 ? '🔔 BELL RUNG! Perfect Chain!' : '🔨 High Striker Complete!';
+  const p=prizeFor(strikerTickets);
+  document.getElementById('resultsPrize').textContent=p.emoji;
+  document.getElementById('resultsBody').innerHTML = `Tickets won: <b>${strikerTickets}</b> 🎟️<br><b>${p.text}</b>`;
+}
+
+/* ---------------- DUCK POND PAIRS ---------------- */
+let duckMode, duckT1, duckT2, duckCurrentTeam, duckTimeLeft, duckFirst, duckSecond, duckLock, duckMatchesFound, duckTotalPairs, duckTeamName1, duckTeamName2, duckSoloTickets;
+function beginDuck(mode){
+  duckMode=mode; duckT1=0; duckT2=0; duckCurrentTeam=1; duckMatchesFound=0; duckSoloTickets=0;
+  duckTeamName1=document.getElementById('team1name').value||'Team 1';
+  duckTeamName2=document.getElementById('team2name').value||'Team 2';
+  duckTotalPairs=MEMORY_PAIRS.length;
+  document.getElementById('duckTurnPill').textContent = mode==='team' ? (duckTeamName1+"'s turn") : 'Find the matching pairs!';
+  duckRenderScoreboard(); duckBuildGrid(); duckUpdateScoreboard();
+  show('screen-duck');
+  duckTimeLeft=TIMER_SECONDS;
+  document.getElementById('duckTimeLeft').textContent=duckTimeLeft;
+  updateBar('duckTimerBar', duckTimeLeft, TIMER_SECONDS);
+  clearInterval(timerHandle);
+  timerHandle=setInterval(()=>{
+    duckTimeLeft--;
+    document.getElementById('duckTimeLeft').textContent=Math.max(0,duckTimeLeft);
+    updateBar('duckTimerBar', duckTimeLeft, TIMER_SECONDS);
+    if(duckTimeLeft<=0){ clearInterval(timerHandle); endDuck(); }
+  },1000);
+}
+function duckRenderScoreboard(){
+  const box=document.getElementById('duckScoreboard');
+  if(duckMode==='team'){
+    box.innerHTML=`<div class="teamcard t1" id="duckTeamCard1"><div>${duckTeamName1}</div><div class="pts" id="duckPts1">0</div></div>
+      <div class="teamcard t2" id="duckTeamCard2"><div>${duckTeamName2}</div><div class="pts" id="duckPts2">0</div></div>`;
+  } else {
+    box.innerHTML=`<div class="teamcard t1"><div>🎟️ Tickets</div><div class="pts" id="duckPtsSolo">0</div></div>`;
+  }
+}
+function duckUpdateScoreboard(){
+  if(duckMode==='team'){
+    document.getElementById('duckPts1').textContent=duckT1;
+    document.getElementById('duckPts2').textContent=duckT2;
+    document.getElementById('duckTeamCard1').classList.toggle('active', duckCurrentTeam===1);
+    document.getElementById('duckTeamCard2').classList.toggle('active', duckCurrentTeam===2);
+  } else {
+    document.getElementById('duckPtsSolo').textContent=duckSoloTickets;
+  }
+}
+function duckBuildGrid(){
+  let cards=[];
+  MEMORY_PAIRS.forEach((p,i)=>{ cards.push({key:i,label:p.a}); cards.push({key:i,label:p.b}); });
+  cards=shuffle(cards);
+  duckFirst=null; duckSecond=null; duckLock=false;
+  const grid=document.getElementById('duckGrid'); grid.innerHTML='';
+  cards.forEach(c=>{
+    const el=document.createElement('div'); el.className='duck'; el.textContent='🦆';
+    el.onclick=()=>duckFlip(el,c);
+    grid.appendChild(el);
+  });
+}
+function duckFlip(el,c){
+  if(duckLock || el.classList.contains('flipped') || el.classList.contains('matched')) return;
+  el.classList.add('flipped'); el.textContent=c.label;
+  if(!duckFirst){ duckFirst={el,c}; return; }
+  duckSecond={el,c}; duckLock=true;
+  if(duckFirst.c.key===duckSecond.c.key){
+    duckFirst.el.classList.add('matched'); duckSecond.el.classList.add('matched');
+    duckMatchesFound++;
+    if(duckMode==='team'){ if(duckCurrentTeam===1) duckT1+=10; else duckT2+=10; } else duckSoloTickets+=10;
+    confettiBurst(); duckUpdateScoreboard();
+    if(duckMode==='team') document.getElementById('duckTurnPill').textContent=(duckCurrentTeam===1?duckTeamName1:duckTeamName2)+"'s turn — matched! Go again 🎉";
+    duckFirst=null; duckSecond=null; duckLock=false;
+    if(duckMatchesFound>=duckTotalPairs){ clearInterval(timerHandle); setTimeout(endDuck,700); }
+  } else {
+    setTimeout(()=>{
+      duckFirst.el.classList.remove('flipped'); duckFirst.el.textContent='🦆';
+      duckSecond.el.classList.remove('flipped'); duckSecond.el.textContent='🦆';
+      duckFirst=null; duckSecond=null; duckLock=false;
+      if(duckMode==='team'){
+        duckCurrentTeam=duckCurrentTeam===1?2:1;
+        document.getElementById('duckTurnPill').textContent=(duckCurrentTeam===1?duckTeamName1:duckTeamName2)+"'s turn";
+        duckUpdateScoreboard();
+      }
+    },900);
+  }
+}
+function endDuck(){
+  show('screen-results'); confettiBurst();
+  if(duckMode==='team'){
+    let winner = duckT1>duckT2 ? `🏆 ${duckTeamName1} wins!` : duckT2>duckT1 ? `🏆 ${duckTeamName2} wins!` : "🤝 It's a tie!";
+    document.getElementById('resultsBanner').textContent = winner;
+    const best=Math.max(duckT1,duckT2); const p=prizeFor(best);
+    document.getElementById('resultsPrize').textContent=p.emoji;
+    document.getElementById('resultsBody').innerHTML = `${duckTeamName1}: <b>${duckT1}</b> 🎟️ &nbsp;|&nbsp; ${duckTeamName2}: <b>${duckT2}</b> 🎟️<br><b>${p.text}</b>`;
+  } else {
+    document.getElementById('resultsBanner').textContent = '🦆 Duck Pond Complete!';
+    const p=prizeFor(duckSoloTickets);
+    document.getElementById('resultsPrize').textContent=p.emoji;
+    document.getElementById('resultsBody').innerHTML = `Tickets won: <b>${duckSoloTickets}</b> 🎟️ (${duckMatchesFound}/${duckTotalPairs} pairs)<br><b>${p.text}</b>`;
+  }
+}
+
+/* ---------------- EDITOR ---------------- */
+function openEditor(){ renderEditor(); show('screen-editor'); }
+function renderEditor(){
+  const list=document.getElementById('editorList'); list.innerHTML='';
+  QUESTIONS.forEach((item,qi)=>{
+    const row=document.createElement('div'); row.className='editrow';
+    const qInput=document.createElement('input');
+    qInput.type='text'; qInput.value=item.q; qInput.placeholder='Question text';
+    qInput.oninput=()=>item.q=qInput.value;
+    row.appendChild(qInput);
+    item.opts.forEach((op,oi)=>{
+      const optRow=document.createElement('div'); optRow.className='optrow';
+      const radio=document.createElement('input');
+      radio.type='radio'; radio.name='correct'+qi; radio.checked=item.correct===oi;
+      radio.onchange=()=>item.correct=oi;
+      const optInput=document.createElement('input');
+      optInput.type='text'; optInput.value=op; optInput.placeholder='Option '+(oi+1);
+      optInput.oninput=()=>item.opts[oi]=optInput.value;
+      optRow.appendChild(radio); optRow.appendChild(optInput);
+      row.appendChild(optRow);
+    });
+    const delBtn=document.createElement('button');
+    delBtn.className='btn pink'; delBtn.textContent='🗑 Delete Question'; delBtn.style.marginTop='6px'; delBtn.style.width='fit-content';
+    delBtn.onclick=()=>{ QUESTIONS.splice(qi,1); renderEditor(); };
+    row.appendChild(delBtn);
+    list.appendChild(row);
+  });
+}
+function addQuestion(){ QUESTIONS.push({q:"New question", opts:["Option A","Option B","Option C","Option D"], correct:0}); renderEditor(); }
+function saveEditor(){ goHome(); }
+function resetQuestions(){ QUESTIONS=JSON.parse(JSON.stringify(DEFAULT_QUESTIONS)); renderEditor(); }
+</script>
+</body>
+</html>
